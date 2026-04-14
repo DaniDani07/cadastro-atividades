@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="icon" type="image/png" href="../img/favicon.png">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</head>
+<body class="page-body-scroll">
+    <div class="card-container card-container-wide">
+        <div class="dashboard-header">
+            <i class="bi bi-grid-fill" style="font-size: 40px; display: block; margin-bottom: 10px;"></i>
+            <h1>Dashboard</h1>
+            <p>Bem-vindo, <span id="nomeUsuario"></span>!</p>
+        </div>
+
+        <div class="dashboard-body dashboard-body-left">
+            <div class="dashboard-botoes dashboard-botoes-coluna">
+                <a href="meu_perfil.html" class="btn-dash">
+                    <i class="bi bi-person-fill"></i> Meu perfil
+                </a>
+                <a href="atividades.html" class="btn-dash">
+                    <i class="bi bi-clipboard-fill"></i> Minhas atividades
+                </a>
+            </div>
+
+            <section class="dashboard-painel">
+                <div class="pessoas-lista-header">
+                    <div>
+                        <h2>Ultimas atividades</h2>
+                        <p id="subtituloAtividades">Carregando suas atividades mais recentes...</p>
+                    </div>
+                </div>
+
+                <div id="listaUltimasAtividades" class="lista-pessoas">
+                    <div class="lista-placeholder">Carregando atividades...</div>
+                </div>
+            </section>
+
+            <button onclick="logout()" class="btn-logout">
+                <i class="bi bi-box-arrow-right"></i> Sair
+            </button>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        if (!estaLogado()) {
+            window.location.href = 'login.html';
+        }
+
+        document.getElementById('nomeUsuario').textContent = localStorage.getItem('nome');
+
+        function formatarData(data) {
+            if (!data) return '-';
+            return new Date(data).toLocaleDateString('pt-BR');
+        }
+
+        async function carregarUltimasAtividades() {
+            const lista = document.getElementById('listaUltimasAtividades');
+            const subtitulo = document.getElementById('subtituloAtividades');
+
+            try {
+                const response = await authFetch('/atividades?limit=3');
+                const atividades = await response.json();
+
+                if (response.status === 401 || response.status === 403) {
+                    logout();
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error(atividades.erro || atividades.message || 'Nao foi possivel carregar atividades.');
+                }
+
+                if (!atividades.length) {
+                    subtitulo.textContent = 'Voce ainda nao cadastrou atividades.';
+                    lista.innerHTML = '<div class="lista-placeholder">Nenhuma atividade cadastrada.</div>';
+                    return;
+                }
+
+                subtitulo.textContent = 'Estas sao as atividades mais recentes da sua conta.';
+                lista.innerHTML = atividades.map((atividade) => `
+                    <article class="atividade-card">
+                        <h3>${atividade.nome}</h3>
+                        <p>${atividade.descricao}</p>
+                        <span>${formatarData(atividade.dataInicio)} ate ${formatarData(atividade.dataTermino)}</span>
+                        <span style="color: #aaa; font-size: 12px;">Criado em: ${formatarData(atividade.createdAt)}</span>
+                        <span class="status-badge ${atividade.status.toLowerCase().replace(' ', '_')}">${atividade.status.replace('_', ' ')}</span>
+                    </article>
+                `).join('');
+            } catch (error) {
+                subtitulo.textContent = 'Nao foi possivel carregar suas atividades.';
+                lista.innerHTML = '<div class="lista-placeholder">Erro ao carregar atividades.</div>';
+            }
+        }
+
+        carregarUltimasAtividades();
+    </script>
+</body>
+</html>

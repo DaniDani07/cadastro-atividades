@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="icon" type="image/png" href="../img/favicon.png">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</head>
+<body>
+    <div class="card-container">
+        <div class="card-header">
+            <i class="bi bi-person-circle"></i>
+            <h1>Login</h1>
+            <p>Faça login para continuar</p>
+        </div>
+        <div class="card-body">
+            <form id="formLogin">
+                <label for="email">E-mail</label>
+                <input type="email" class="form-control" id="email" placeholder="seu@email.com" required>
+
+                <label for="password">Senha</label>
+                <input type="password" class="form-control" id="password" placeholder="Sua senha" required>
+
+                <button type="submit" class="btn-primary-custom">
+                    <i class="bi bi-box-arrow-in-right"></i> Entrar
+                </button>
+
+                <div class="separador">ou</div>
+
+                <div class="link-bottom">
+                    Não tem uma conta? <a href="cadastro-sistema.html">Cadastre-se</a>
+                </div>
+
+                <div id = "mensagem" style="display:none; margin-top: 15px; padding: 10px; border-radius: 8px; text-align: center; font-size: 14px;"></div>
+
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+<script>
+    function mostrarMensagem(texto, tipo) {
+        const msg = document.getElementById('mensagem');
+        msg.textContent = texto;
+        msg.style.display = 'block';
+        if (tipo === 'erro') {
+            msg.style.backgroundColor = '#f8d7da';
+            msg.style.color = '#721c24';
+        }
+        if(msg.timeoutId) {
+            clearTimeout(msg.timeoutId);
+        }
+        msg.timeoutId = setTimeout(() => {
+            msg.style.display = 'none';
+            msg.textContent = '';
+        }, 2000);
+
+    }
+
+    if (estaLogado()) {
+        window.location.href = 'dashboard.html';
+    }
+
+    document.getElementById('formLogin').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const resultado = await login(email, password);
+        if (resultado.token) {
+            salvarToken(resultado.token, resultado.nome, resultado.email);
+            window.location.href = 'dashboard.html';
+        } else {
+            mostrarMensagem('Email ou senha incorretos!', 'erro');
+            
+        }
+    });
+</script>
+</body>
+</html>

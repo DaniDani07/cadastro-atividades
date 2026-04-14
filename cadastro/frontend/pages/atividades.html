@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Atividades</title>
+    <link rel="icon" type="image/png" href="../img/favicon.png">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</head>
+<body class="page-body-scroll">
+    <div class="card-container card-container-wide">
+        <div class="card-header">
+            <i class="bi bi-clipboard-check-fill"></i>
+            <h1>Minhas Atividades</h1>
+            <p>Cadastre e acompanhe somente as atividades da sua conta.</p>
+        </div>
+
+        <div class="card-body">
+            <div class="pessoas-topbar">
+                <p id="descricaoForm">Voce pode criar novas atividades, editar o que ja existe ou remover itens finalizados.</p>
+
+                <div class="pessoas-topbar-acoes">
+                    <button type="button" class="btn-primary-custom btn-inline" id="btnNovaAtividade">
+                        <i class="bi bi-plus-circle"></i> Nova atividade
+                    </button>
+                    <a href="dashboard.html" class="btn-secondary-custom btn-inline">
+                        <i class="bi bi-arrow-left"></i> Voltar
+                    </a>
+                </div>
+            </div>
+
+            <div id="mensagem" class="mensagem-alerta" style="display: none;"></div>
+
+            <div class="pessoas-layout">
+                <section class="pessoas-panel" id="painelFormulario" style="display: none;">
+                    <div class="pessoas-panel-header">
+                        <h2 id="tituloFormulario">Cadastrar atividade</h2>
+                        <p id="subtituloFormulario">Preencha os dados abaixo para adicionar uma nova atividade.</p>
+                    </div>
+
+                    <form id="formAtividade">
+                        <label for="nome">Nome da atividade</label>
+                        <input type="text" class="form-control" id="nome" placeholder="Ex.: Estudar" required>
+
+                        <label for="descricao">Descricao</label>
+                        <textarea class="form-control form-control-area" id="descricao" placeholder="Descreva a atividade" required></textarea>
+
+                        <div class="pessoas-form-grid">
+                            <div>
+                                <label for="dataInicio">Data de inicio</label>
+                                <input type="date" class="form-control" id="dataInicio" required>
+                            </div>
+
+                            <div>
+                                <label for="dataTermino">Data de termino</label>
+                                <input type="date" class="form-control" id="dataTermino" required>
+                            </div>
+                        </div>
+
+                        <div class="pessoas-form-acoes">
+                            <button type="submit" class="btn-primary-custom" id="btnSalvarAtividade">
+                                <i class="bi bi-check-circle"></i> Salvar atividade
+                            </button>
+                            <button type="button" class="btn-secondary-custom" id="btnCancelarEdicao" style="display: none;">
+                                <i class="bi bi-x-circle"></i> Cancelar edicao
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="pessoas-panel">
+                    <div class="pessoas-lista-header">
+                        <div>
+                            <h2>Atividades cadastradas</h2>
+                            <p id="contadorAtividades">Carregando lista...</p>
+                        </div>
+                    </div>
+
+                    <div id="listaAtividades" class="lista-pessoas">
+                        <div class="lista-placeholder">Carregando atividades...</div>
+                    </div>
+                </section>
+            </div>
+            <div id="modalConfirmar" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center;">
+                <div style="background:white; border-radius:16px; padding:32px; max-width:400px; width:90%; text-align:center;">
+                    <i class="bi bi-exclamation-triangle-fill" style="font-size:40px; color:#e35d4f;"></i>
+                    <h3 style="margin:16px 0 8px; color:#14353a;">Confirmar exclusão</h3>
+                    <p id="textoModal" style="color:#516569; margin-bottom:24px;"></p>
+                    <div style="display:flex; gap:12px; justify-content:center;">
+                        <button id="btnConfirmarDeletar" class="btn-acao btn-deletar" style="width:auto; padding:12px 24px;">
+                            <i class="bi bi-trash"></i> Deletar
+                        </button>
+                        <button id="btnCancelarDeletar" class="btn-secondary-custom" style="width:auto; padding:12px 24px;">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        if (!estaLogado()) {
+            window.location.href = 'login.html';
+        }
+
+        const formAtividade = document.getElementById('formAtividade');
+        const listaAtividades = document.getElementById('listaAtividades');
+        const mensagem = document.getElementById('mensagem');
+        const contadorAtividades = document.getElementById('contadorAtividades');
+        const btnCancelarEdicao = document.getElementById('btnCancelarEdicao');
+        const tituloFormulario = document.getElementById('tituloFormulario');
+        const subtituloFormulario = document.getElementById('subtituloFormulario');
+        const btnSalvarAtividade = document.getElementById('btnSalvarAtividade');
+        const painelFormulario = document.getElementById('painelFormulario');
+
+        function abrirFormulario(){
+            painelFormulario.style.display = 'block';
+        }
+
+        function fecharFormulario(){
+            painelFormulario.style.display = 'none';
+        }
+
+        let atividades = [];
+        let atividadeEditandoId = null;
+
+        function mostrarMensagem(texto, tipo) {
+            mensagem.textContent = texto;
+            mensagem.style.display = 'block';
+            mensagem.className = `mensagem-alerta ${tipo === 'erro' ? 'mensagem-erro' : 'mensagem-sucesso'}`;
+
+            if (mensagem.timeoutId) {
+                clearTimeout(mensagem.timeoutId);
+            }
+            mensagem.timeoutId = setTimeout(() => {
+                mensagem.style.display = 'none';
+                mensagem.textContent = '';
+            }, 2000);
+        }
+
+        function esconderMensagem() {
+            mensagem.style.display = 'none';
+            mensagem.textContent = '';
+            mensagem.className = 'mensagem-alerta';
+        }
+
+        function formatarData(data) {
+            if (!data) return '-';
+            return new Date(data).toLocaleDateString('pt-BR');
+        }
+
+        function formatarDataInput(data) {
+            if (!data) return '';
+            return new Date(data).toISOString().split('T')[0];
+        }
+
+        function limparFormulario() {
+            atividadeEditandoId = null;
+            formAtividade.reset();
+            tituloFormulario.textContent = 'Cadastrar atividade';
+            subtituloFormulario.textContent = 'Preencha os dados abaixo para adicionar uma nova atividade.';
+            btnSalvarAtividade.innerHTML = '<i class="bi bi-check-circle"></i> Salvar atividade';
+            btnCancelarEdicao.style.display = 'none';
+        }
+
+        function preencherFormulario(atividade) {
+            document.getElementById('nome').value = atividade.nome || '';
+            document.getElementById('descricao').value = atividade.descricao || '';
+            document.getElementById('dataInicio').value = formatarDataInput(atividade.dataInicio);
+            document.getElementById('dataTermino').value = formatarDataInput(atividade.dataTermino);
+        }
+
+        function entrarModoEdicao(atividade) {
+            atividadeEditandoId = atividade.id;
+            preencherFormulario(atividade);
+            abrirFormulario();
+            tituloFormulario.textContent = 'Editar atividade';
+            subtituloFormulario.textContent = `Atualizando a atividade ${atividade.nome}.`;
+            btnSalvarAtividade.innerHTML = '<i class="bi bi-pencil-square"></i> Atualizar atividade';
+            btnCancelarEdicao.style.display = 'block';
+            esconderMensagem();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderizarLista() {
+            if (!atividades.length) {
+                contadorAtividades.textContent = 'Nenhuma atividade cadastrada ate o momento.';
+                listaAtividades.innerHTML = '<div class="lista-placeholder">Nenhuma atividade cadastrada.</div>';
+                return;
+            }
+
+            contadorAtividades.textContent = `${atividades.length} atividade(s) cadastrada(s).`;
+            listaAtividades.innerHTML = atividades.map((atividade) => `
+                <article class="atividade-card atividade-card-full">
+                    <div class="pessoa-card-topo">
+                        <div>
+                            <h3>${atividade.nome}</h3>
+                            <p>${atividade.descricao}</p>
+                            <span>${formatarData(atividade.dataInicio)} ate ${formatarData(atividade.dataTermino)}</span>
+                            <span style="color: #aaa; font-size: 12px; display: block; margin-top: 4px;">Criado em: ${formatarData(atividade.createdAt)}</span>
+                            <span class="status-badge ${atividade.status.toLowerCase().replace(' ', '_')}">${atividade.status.replace('_', ' ')}</span>
+                        </div>
+
+                        <div class="pessoa-card-acoes">
+                            <button type="button" class="btn-acao btn-editar" data-acao="editar" data-id="${atividade.id}">
+                                <i class="bi bi-pencil-square"></i> Editar
+                            </button>
+                            <button type="button" class="btn-acao btn-deletar" data-acao="deletar" data-id="${atividade.id}">
+                                <i class="bi bi-trash"></i> Deletar
+                            </button>
+                        <div class="status-acoes">
+                            <button class="btn-status aberta" data-acao="status" data-status="aberta" data-id="${atividade.id}">
+                                Aberta
+                            </button>
+
+                            <button class="btn-status em_andamento" data-acao="status" data-status="em_andamento" data-id="${atividade.id}">
+                                Em andamento
+                            </button>
+
+                            <button class="btn-status concluido" data-acao="status" data-status="concluido" data-id="${atividade.id}">
+                                Concluído
+                            </button>
+                        </div>  
+                        </div>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        async function tratarResposta(response) {
+            const data = await response.json().catch(() => ({}));
+
+            if (response.status === 401 || response.status === 403) {
+                logout();
+                return null;
+            }
+
+            if (!response.ok) {
+                throw new Error(data.erro || data.message || 'Nao foi possivel completar a operacao.');
+            }
+
+            return data;
+        }
+
+        async function carregarAtividades() {
+            contadorAtividades.textContent = 'Carregando lista...';
+            listaAtividades.innerHTML = '<div class="lista-placeholder">Carregando atividades...</div>';
+
+            try {
+                const response = await authFetch('/atividades');
+                const data = await tratarResposta(response);
+
+                if (!data) {
+                    return;
+                }
+
+                atividades = data;
+                renderizarLista();
+            } catch (error) {
+                contadorAtividades.textContent = 'Nao foi possivel carregar a lista.';
+                listaAtividades.innerHTML = '<div class="lista-placeholder">Erro ao carregar atividades.</div>';
+                mostrarMensagem(error.message, 'erro');
+            }
+        }
+
+        formAtividade.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            esconderMensagem();
+
+            const dados = {
+                nome: document.getElementById('nome').value.trim(),
+                descricao: document.getElementById('descricao').value.trim(),
+                dataInicio: document.getElementById('dataInicio').value,
+                dataTermino: document.getElementById('dataTermino').value
+            };
+
+            const rota = atividadeEditandoId ? `/atividades/${atividadeEditandoId}` : '/atividades';
+            const metodo = atividadeEditandoId ? 'PUT' : 'POST';
+
+            try {
+                const response = await authFetch(rota, {
+                    method: metodo,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(dados)
+                });
+
+                const resultado = await tratarResposta(response);
+
+                if (!resultado) {
+                    return;
+                }
+
+                mostrarMensagem(
+                    atividadeEditandoId ? 'Atividade atualizada com sucesso.' : 'Atividade cadastrada com sucesso.',
+                    'sucesso'
+                );
+
+                limparFormulario();
+                fecharFormulario();
+                await carregarAtividades();
+            } catch (error) {
+                mostrarMensagem(error.message, 'erro');
+            }
+        });
+
+        function abrirModal(texto) {
+            return new Promise((resolve) => {
+                document.getElementById('textoModal').textContent = texto;
+                const modal = document.getElementById('modalConfirmar');
+                modal.style.display = 'flex';
+
+                document.getElementById('btnConfirmarDeletar').onclick = () => {
+                    modal.style.display = 'none';
+                    resolve(true);
+                };
+
+                document.getElementById('btnCancelarDeletar').onclick = () => {
+                    modal.style.display = 'none';
+                    resolve(false);
+                };
+            });
+        }
+
+        listaAtividades.addEventListener('click', async (event) => {
+            const botao = event.target.closest('[data-acao]');
+
+            if (!botao) {
+                return;
+            }
+
+            const atividade = atividades.find((item) => String(item.id) === String(botao.dataset.id));
+            if (!atividade) {
+                return;
+            }
+
+            if (botao.dataset.acao === 'editar') {
+                entrarModoEdicao(atividade);
+                return;
+            }
+
+            if (botao.dataset.acao === 'status') {
+                const novoStatus = botao.dataset.status;
+
+                try {
+                    const response = await authFetch(`/atividades/${atividade.id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ status: novoStatus })
+                    });
+
+                    const resultado = await tratarResposta(response);
+                    if (!resultado) return;
+
+                    mostrarMensagem('Status atualizado!', 'sucesso');
+                    await carregarAtividades();
+
+                } catch (error) {
+                    mostrarMensagem(error.message, 'erro');
+                }
+
+                return;
+            }
+
+            const confirmou = await abrirModal(`Deseja deletar a atividade ${atividade.nome}?`);
+            if (!confirmou) {
+                return;
+            }
+
+            try {
+                const response = await authFetch(`/atividades/${atividade.id}`, {
+                    method: 'DELETE'
+                });
+
+                const resultado = await tratarResposta(response);
+                if (!resultado) {
+                    return;
+                }
+
+                mostrarMensagem(resultado.message || 'Atividade deletada com sucesso.', 'sucesso');
+                await carregarAtividades();
+            } catch (error) {
+                mostrarMensagem(error.message, 'erro');
+            }
+        });
+
+        document.getElementById('btnNovaAtividade').addEventListener('click', () => {
+            limparFormulario();
+            esconderMensagem();
+            abrirFormulario();
+            document.getElementById('nome').focus();
+        });
+
+        btnCancelarEdicao.addEventListener('click', () => {
+            limparFormulario();
+            esconderMensagem();
+            fecharFormulario();
+        });
+
+        limparFormulario();
+        carregarAtividades();
+    </script>
+</body>
+</html>

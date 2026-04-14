@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil</title>
+    <link rel="icon" type="image/png" href="../img/favicon.png">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</head>
+<body class="page-body-scroll">
+    <div class="card-container card-container-form">
+        <div class="card-header">
+            <i class="bi bi-person-vcard-fill"></i>
+            <h1>Meu Perfil</h1>
+            <p>Atualize seus dados pessoais. Seu e-mail de acesso permanece fixo.</p>
+        </div>
+
+        <div class="card-body">
+
+            <form id="formPerfil">
+                <label for="nome">Nome</label>
+                <input type="text" class="form-control" id="nome" placeholder="Seu nome completo" required>
+
+                <label for="email">E-mail</label>
+                <input style="background-color: #f8f9fa; border: 1px solid #ced4da; color: #a0a19f;" type="email" class="form-control" id="email" readonly>
+
+                <label for="telefone">Telefone</label>
+                <input type="text" class="form-control" id="telefone" placeholder="(00) 00000-0000" required>
+
+                <div class="pessoas-form-grid">
+                    <div>
+                        <label for="rua">Rua</label>
+                        <input type="text" class="form-control" id="rua" placeholder="Sua rua" required>
+                    </div>
+
+                    <div>
+                        <label for="numero_da_casa">Numero</label>
+                        <input type="text" class="form-control" id="numero_da_casa" placeholder="123" required>
+                    </div>
+                </div>
+
+                <div class="pessoas-form-grid">
+                    <div>
+                        <label for="bairro">Bairro</label>
+                        <input type="text" class="form-control" id="bairro" placeholder="Seu bairro" required>
+                    </div>
+
+                    <div>
+                        <label for="cidade">Cidade</label>
+                        <input type="text" class="form-control" id="cidade" placeholder="Sua cidade" required>
+                    </div>
+                </div>
+
+                <label for="complemento">Complemento</label>
+                <input type="text" class="form-control" id="complemento" placeholder="Apto, bloco, referencia...">
+
+                <div id="mensagem" class="mensagem-alerta" style="display: none;"></div>
+
+                <div class="pessoas-form-acoes">
+                    <button type="submit" class="btn-primary-custom">
+                        <i class="bi bi-check-circle"></i> Salvar alteracoes
+                    </button>
+                    <a href="dashboard.html" class="btn-secondary-custom">
+                        <i class="bi bi-arrow-left"></i> Voltar para dashboard
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        if (!estaLogado()) {
+            window.location.href = 'login.html';
+        }
+
+        const formPerfil = document.getElementById('formPerfil');
+        const mensagem = document.getElementById('mensagem');
+
+        function mostrarMensagem(texto, tipo) {
+            mensagem.textContent = texto;
+            mensagem.style.display = 'block';
+            mensagem.className = `mensagem-alerta ${tipo === 'erro' ? 'mensagem-erro' : 'mensagem-sucesso'}`;
+
+            if (mensagem.timeoutId) {
+                clearTimeout(mensagem.timeoutId);
+            }
+            mensagem.timeoutId = setTimeout(() => {
+                mensagem.style.display = 'none';
+                mensagem.textContent = '';
+            }, 2000);
+        }
+
+        function preencherFormulario(perfil) {
+            document.getElementById('nome').value = perfil.nome || '';
+            document.getElementById('email').value = perfil.email || localStorage.getItem('email') || '';
+            document.getElementById('telefone').value = perfil.telefone || '';
+            document.getElementById('rua').value = perfil.rua || '';
+            document.getElementById('numero_da_casa').value = perfil.numero_da_casa || '';
+            document.getElementById('bairro').value = perfil.bairro || '';
+            document.getElementById('cidade').value = perfil.cidade || '';
+            document.getElementById('complemento').value = perfil.complemento || '';
+        }
+
+        async function carregarPerfil() {
+            try {
+                const response = await authFetch('/pessoas/me');
+                const perfil = await response.json();
+
+                if (response.status === 401 || response.status === 403) {
+                    logout();
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error(perfil.erro || perfil.message || 'Nao foi possivel carregar o perfil.');
+                }
+
+                preencherFormulario(perfil);
+            } catch (error) {
+                mostrarMensagem(error.message, 'erro');
+            }
+        }
+
+        document.getElementById('telefone').addEventListener('input', function(){
+            const telefone = this.value;
+            const msg = document.getElementById('mensagem');
+            const regex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
+
+            if (!regex.test(telefone)){
+                this.style.borderColor = '#e35d4f';
+            } else {
+                this.style.borderColor = '#2bb3c0';
+            }
+
+        });
+
+        formPerfil.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const dados = {
+                nome: document.getElementById('nome').value.trim(),
+                telefone: document.getElementById('telefone').value.trim(),
+                rua: document.getElementById('rua').value.trim(),
+                numero_da_casa: document.getElementById('numero_da_casa').value.trim(),
+                bairro: document.getElementById('bairro').value.trim(),
+                cidade: document.getElementById('cidade').value.trim(),
+                complemento: document.getElementById('complemento').value.trim()
+            };
+
+            const telefone = dados.telefone;
+            const regexTelefone = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
+
+            if (!regexTelefone.test(telefone)) {
+                mostrarMensagem('Telefone invalido! Use o formato (00) 00000-0000', 'erro');
+                setTimeout(() => {
+                    msg.style.display = 'none';
+                    msg.textContent = '';
+                }, 2000);
+                return;
+            }
+
+            try {
+                const response = await authFetch('/pessoas/me', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(dados)
+                });
+
+                const resultado = await response.json();
+
+                if (response.status === 401 || response.status === 403) {
+                    logout();
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error(resultado.erro || resultado.message || 'Nao foi possivel salvar o perfil.');
+                }
+
+                localStorage.setItem('nome', dados.nome);
+                mostrarMensagem('Perfil atualizado com sucesso.', 'sucesso');
+                preencherFormulario(resultado);
+            } catch (error) {
+                mostrarMensagem(error.message, 'erro');
+            }
+        });
+
+        carregarPerfil();
+    </script>
+</body>
+</html>

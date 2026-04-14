@@ -1,0 +1,579 @@
+/* ===== Base Global ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-image: linear-gradient(rgb(51, 122, 134), rgb(29, 40, 42));
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: sans-serif;
+}
+
+.page-body-scroll {
+    align-items: flex-start;
+    padding: 24px 16px;
+}
+
+/* ===== Estrutura Compartilhada ===== */
+.card-container {
+    width: 420px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.card-container-wide {
+    width: min(1080px, calc(100vw - 32px));
+}
+
+.card-container-form {
+    width: min(760px, calc(100vw - 32px));
+}
+
+.card-header {
+    background: linear-gradient(135deg, #2bb3c0, #1a7a85);
+    padding: 35px 40px;
+    text-align: center;
+    color: white;
+}
+
+.card-header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.card-header p {
+    font-size: 14px;
+    opacity: 0.85;
+    margin: 0;
+}
+
+.card-header i {
+    font-size: 40px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.card-body {
+    background-color: white;
+    padding: 35px 40px;
+}
+
+.card-body label {
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.card-body .form-control {
+    border: 1.5px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 12px 15px;
+    font-size: 14px;
+    color: #333;
+    background-color: #f9f9f9;
+    width: 100%;
+    margin-bottom: 18px;
+    outline: none;
+    transition: border 0.2s;
+}
+
+.card-body .form-control:focus {
+    border-color: #2bb3c0;
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(43, 179, 192, 0.15);
+}
+
+.card-body .form-control::placeholder {
+    color: #aaa;
+}
+
+.form-control-area {
+    min-height: 120px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+/* ===== Botoes Compartilhados ===== */
+.btn-primary-custom {
+    background: linear-gradient(135deg, #2bb3c0, #1a7a85);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 13px;
+    font-size: 16px;
+    font-weight: 600;
+    width: 100%;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-top: 5px;
+}
+
+.btn-primary-custom:hover {
+    opacity: 0.9;
+}
+
+.btn-secondary-custom {
+    background: #eef6f7;
+    color: #1a7a85;
+    border: 1px solid #cfe7ea;
+    border-radius: 10px;
+    padding: 13px;
+    font-size: 16px;
+    font-weight: 600;
+    width: 100%;
+    cursor: pointer;
+    transition: 0.2s;
+    text-decoration: none;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-secondary-custom:hover {
+    background: #e1f0f2;
+}
+
+.btn-inline {
+    width: auto;
+    padding: 12px 18px;
+}
+
+.btn-acao {
+    border: none;
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.2s, opacity 0.2s;
+    text-decoration: none;
+}
+
+.btn-acao:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+}
+
+.btn-editar {
+    background: linear-gradient(135deg, #2bb3c0, #1a7a85);
+    color: white;
+}
+
+.btn-deletar {
+    background: linear-gradient(135deg, #e35d4f, #b63e31);
+    color: white;
+}
+
+.btn-dash {
+    background: linear-gradient(135deg, #2bb3c0, #1a7a85);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 15px 25px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-dash:hover {
+    opacity: 0.9;
+    color: white;
+}
+
+.btn-logout {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 25px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 auto;
+}
+
+.btn-logout:hover {
+    opacity: 0.9;
+}
+
+/* ===== Status das Atividades ===== */
+
+.status-acoes {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.btn-status {
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: all 0.2s ease;
+}
+
+/* cores */
+.btn-status.aberta {
+  background: #f0ad4e;
+  color: white;
+}
+
+.btn-status.em_andamento {
+  background: #5bc0de;
+  color: white;
+}
+
+.btn-status.concluido {
+  background: #5cb85c;
+  color: white;
+}
+
+/* botão ativo */
+.btn-status.ativo {
+  opacity: 1;
+  transform: scale(1.05);
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.15);
+}
+
+/* hover */
+.btn-status:hover {
+  opacity: 1;
+}
+
+/* ===== Mensagens e Auxiliares ===== */
+.mensagem-alerta {
+    margin-bottom: 20px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 14px;
+}
+
+.mensagem-sucesso {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.mensagem-erro {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.separador {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 20px 0;
+    color: #aaa;
+    font-size: 13px;
+}
+
+.separador::before,
+.separador::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: #e0e0e0;
+}
+
+.link-bottom {
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+}
+
+.link-bottom a {
+    color: #2bb3c0;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.link-bottom a:hover {
+    text-decoration: underline;
+}
+
+.status-badge {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: white !important;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* cores */
+.status-badge.aberta {
+  background: #f0ad4e;
+}
+
+.status-badge.em_andamento {
+  background: #5bc0de;
+}
+
+.status-badge.concluido {
+  background: #5cb85c;
+}
+
+/* ===== Dashboard.html ===== */
+.dashboard-header {
+    background: linear-gradient(135deg, #2bb3c0, #1a7a85);
+    padding: 35px 40px;
+    text-align: center;
+    color: white;
+    border-radius: 20px 20px 0 0;
+}
+
+.dashboard-body {
+    background-color: white;
+    padding: 35px 40px;
+    border-radius: 0 0 20px 20px;
+    text-align: center;
+}
+
+.dashboard-body p {
+    color: #666;
+}
+
+.dashboard-body-left {
+    text-align: left;
+}
+
+.dashboard-botoes {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin: 25px 0;
+}
+
+.dashboard-botoes-coluna {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+.dashboard-painel {
+    background: #f8fbfb;
+    border: 1px solid #e3eeee;
+    border-radius: 18px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+/* ===== Cadastro-Sistema / Meu-Perfil / Atividades ===== */
+#descricaoForm {
+    background-color: white;
+    padding: 10px 20px;
+    text-align: center;
+}
+
+.pessoas-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.pessoas-topbar-acoes {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.pessoas-layout {
+    display: grid;
+    grid-template-columns: minmax(320px, 1fr) minmax(360px, 1.1fr);
+    gap: 24px;
+}
+
+.pessoas-panel {
+    background: #f8fbfb;
+    border: 1px solid #e3eeee;
+    border-radius: 18px;
+    padding: 24px;
+}
+
+.pessoas-panel-header {
+    margin-bottom: 20px;
+}
+
+.pessoas-panel h2 {
+    font-size: 22px;
+    color: #18383d;
+    margin-bottom: 6px;
+}
+
+.pessoas-panel p {
+    color: #66787c;
+}
+
+.pessoas-form-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 0.8fr;
+    gap: 14px;
+}
+
+.pessoas-form-acoes {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.pessoas-lista-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.lista-pessoas {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.lista-placeholder {
+    border: 1px dashed #c7dbde;
+    background: white;
+    color: #698287;
+    border-radius: 14px;
+    padding: 22px;
+    text-align: center;
+}
+
+
+/* ===== Cards de Pessoa ===== */
+.pessoa-card {
+    background: white;
+    border: 1px solid #dce9eb;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 10px 24px rgba(19, 82, 92, 0.08);
+}
+
+.pessoa-card-topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 18px;
+    overflow: visible;
+}
+
+.pessoa-card h3 {
+    font-size: 19px;
+    color: #14353a;
+    margin-bottom: 10px;
+}
+
+.pessoa-card p {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    line-height: 1.45;
+    color: #516569;
+}
+
+.pessoa-card-acoes {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 128px;
+}
+
+/* ===== Cards de Atividade ===== */
+.atividade-card {
+    background: white;
+    border: 1px solid #dce9eb;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 10px 24px rgba(19, 82, 92, 0.08);
+}
+
+.atividade-card h3 {
+    font-size: 18px;
+    color: #14353a;
+    margin-bottom: 10px;
+}
+
+.atividade-card p {
+    margin-bottom: 10px;
+    color: #516569;
+    line-height: 1.5;
+}
+
+.atividade-card span {
+    color: #1a7a85;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.atividade-card-full {
+    width: 100%;
+}
+
+/* ===== Responsivo ===== */
+@media (max-width: 900px) {
+    .pessoas-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .pessoa-card-topo {
+        flex-direction: column;
+    }
+
+    .pessoa-card-acoes {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .card-body {
+        padding: 24px 18px;
+    }
+
+    .pessoas-topbar {
+        flex-direction: column;
+    }
+
+    .pessoas-topbar-acoes {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .pessoas-topbar-acoes > * {
+        flex: 1;
+    }
+
+    .pessoas-form-grid {
+        grid-template-columns: 1fr;
+    }
+}
