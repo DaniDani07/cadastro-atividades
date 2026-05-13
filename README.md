@@ -1,3 +1,4 @@
+```bash
 Sistema de cadastro e gerenciamento de atividades
 
 Sistema web para cadastro de usuários e gerenciamento de atividades pessoais. Cada usuário possui um perfil próprio e gerencia somente suas próprias atividades.
@@ -9,8 +10,9 @@ Como executar o projeto:
 - Node.js versão 18 ou superior
 - Navegador moderno
 
-1- Clone o repositório:
-- git clone https://github.com/DaniDani07/cadastro-atividades.git
+1- Clone o repositorio:
+
+git clone https://github.com/DaniDani07/cadastro-atividades.git
 
 2- Instale as dependências e inicie o servidor:
 
