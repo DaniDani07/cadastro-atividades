@@ -11,6 +11,7 @@ Como executar o projeto:
 
 1- Clone o repositório:
 - git clone https://github.com/DaniDani07/cadastro-atividades.git
+
 2- Instale as dependências e inicie o servidor:
 
 - cd cadastro/backend
