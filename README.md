@@ -69,17 +69,6 @@ Requisitos não funcionais:
 - Frontend em HTML, CSS e JavaScript puro
 - Código organizado em camadas: controllers, models, routes e middlewares
 
-Decisões técnicas:
-
-- O teste solicitava Angular com NgZorro, mas, optei por HTML, CSS E Javascript devido ao prazo de entrega e ao nível de experiencia com a framework, essa decisão permitiu entregar um sistema funcional e estruturado, dentro do prazo disponível, mas, compreendo que o ideal seria Angular.
-
-- O SQLite foi escolhido por não exigir uma instalação ou configuração extra, facilitando uma execução em qualquer máquina.
-
-- O Express serve os arquivos estáticos do frontend diretamente
-
-- A conta de acesso (Usuário) armazena apenas dados de login. os dados pessoais ficam em um modelo separado(Pessoa), vinculado ao usuário por chave estrangeira.
-
--Testes unitários não foram implementados devido ao prazo e ao nível inicial de experiência, mas, é algo a ser evoluído ainda.
 
 Tecnologias utilizadas:
 
